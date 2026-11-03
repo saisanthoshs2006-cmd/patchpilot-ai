@@ -49,9 +49,11 @@ verification runs only on the built-in demo project, because verifying a fix exe
 project's tests and the sandbox is not a security boundary. Uploaded and pasted code still get
 the full review. For local development, put `PATCHPILOT_PUBLIC=0` in `.env`.
 
-Deploy on [Streamlit Community Cloud](https://share.streamlit.io): new app → this repo, branch
-`main`, main file `app.py`, Python 3.12. No secrets are needed: the demo replays from
-`demo/llm_cache`. Adding `GROQ_API_KEY` as a secret enables Live AI reviews for new code.
+Deploy anywhere that runs Docker; the `Dockerfile` pins Python 3.12, runs as an unprivileged user and
+listens on `$PORT`. On [Render](https://render.com): New → Web Service → this repo → Docker →
+Free. No secrets are needed: the demo replays from `demo/llm_cache`. Adding `GROQ_API_KEY` as an
+environment variable enables Live AI reviews for new code. Locally:
+`docker build -t patchpilot . && docker run -p 8501:8501 patchpilot`.
 
 ### Command line / CI
 
