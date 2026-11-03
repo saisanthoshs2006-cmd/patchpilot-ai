@@ -42,6 +42,17 @@ Then review the **demo project**, paste code or upload a `.py`/`.zip`, and click
 **Generate & verify fixes**. Reports download as HTML, JSON or SARIF. **History** keeps
 every review in SQLite; **Benchmark** shows the evaluation below.
 
+### Public mode and deployment
+
+Public mode is **on by default** (`PATCHPILOT_PUBLIC=1`). It starts in Replay, and fix
+verification runs only on the built-in demo project, because verifying a fix executes the
+project's tests and the sandbox is not a security boundary. Uploaded and pasted code still get
+the full review. For local development, put `PATCHPILOT_PUBLIC=0` in `.env`.
+
+Deploy on [Streamlit Community Cloud](https://share.streamlit.io): new app → this repo, branch
+`main`, main file `app.py`, Python 3.12. No secrets are needed: the demo replays from
+`demo/llm_cache`. Adding `GROQ_API_KEY` as a secret enables Live AI reviews for new code.
+
 ### Command line / CI
 
 ```bash

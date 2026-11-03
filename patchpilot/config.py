@@ -37,9 +37,10 @@ IGNORED_DIR_NAMES = {
 IGNORED_FILE_NAMES = {".DS_Store", "Thumbs.db"}
 
 # --- LLM ---------------------------------------------------------------------
-# Provider: explicit PATCHPILOT_LLM_PROVIDER wins; otherwise whichever key is configured.
+# Provider: explicit PATCHPILOT_LLM_PROVIDER wins; otherwise whichever key is configured. With no key,
+# Groq: the recorded demo responses (demo/llm_cache) were made with it, so replay works out of the box.
 LLM_PROVIDER = os.environ.get("PATCHPILOT_LLM_PROVIDER") or (
-    "anthropic" if os.environ.get("ANTHROPIC_API_KEY") else "groq" if os.environ.get("GROQ_API_KEY") else "anthropic"
+    "anthropic" if os.environ.get("ANTHROPIC_API_KEY") else "groq"
 )
 _DEFAULT_MODEL = {"anthropic": "claude-opus-5-5", "groq": "openai/gpt-oss-120b"}[LLM_PROVIDER]
 REASONING_MODEL = os.environ.get("PATCHPILOT_REASONING_MODEL", _DEFAULT_MODEL)
@@ -49,6 +50,9 @@ PATCH_EFFORT = os.environ.get("PATCHPILOT_PATCH_EFFORT", "medium")  # a targeted
 # auto: replay from cache when possible, call the API otherwise (and record)
 # replay: cache only, never touch the network (demo-safe) | offline: no AI engine at all
 LLM_MODE = os.environ.get("PATCHPILOT_LLM_MODE", "auto")
+# Public deployments must not run uploaded code: fix verification executes the project's tests,
+# and the sandbox is not a security boundary. On unless explicitly turned off (local .env).
+PUBLIC_MODE = os.environ.get("PATCHPILOT_PUBLIC", "1") != "0"
 LLM_MAX_PARALLEL = 2 if LLM_PROVIDER == "groq" else 4  # Groq's free tier has tight per-minute token limits
 LLM_MAX_RETRIES = 6  # SDKs back off on 429 using the server's retry-after
 LLM_TIMEOUT_S = 180

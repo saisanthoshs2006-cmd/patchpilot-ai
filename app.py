@@ -27,13 +27,15 @@ AI_MODES = {
     "Replay recorded (no network)": "replay",
     "Off (tools only)": "offline",
 }
+if "ai_mode" not in st.session_state:
+    st.session_state.ai_mode = "Replay recorded (no network)" if config.PUBLIC_MODE else "Live (record to cache)"
 
 
 def ai_mode() -> str:
     return AI_MODES[st.session_state.ai_mode]
 
 
-def run_review(make_workspace) -> None:
+def run_review(make_workspace, is_demo: bool = False) -> None:
     try:
         ws = make_workspace()
     except loader.IngestionError as exc:
@@ -48,6 +50,7 @@ def run_review(make_workspace) -> None:
         status.update(label=f"Review complete: {len(rev.findings)} findings", state="complete", expanded=False)
     st.session_state.review = rev
     st.session_state.skipped = ws.skipped
+    st.session_state.is_demo = is_demo
     db.save(rev)
 
 
@@ -125,6 +128,9 @@ with st.sidebar:
     st.caption("Hybrid code review: static analysis + AST + security + AI, with verified fixes. Python only.")
     page = st.radio("View", ["Review", "History", "Benchmark"], horizontal=True, key="page")
     st.radio("AI reasoning", list(AI_MODES), key="ai_mode")
+    if config.PUBLIC_MODE:
+        st.caption("Public demo: Replay uses recorded AI responses, so the demo project gets AI findings with no "
+                   "network. New code gets AI findings only in Live mode, if the host has an API key.")
     st.caption(f"Model: `{config.REASONING_MODEL}` via {config.LLM_PROVIDER}")
     if ai_mode() == "auto" and not os.environ.get(KEY_ENV[config.LLM_PROVIDER]):
         st.caption(f"⚠️ No {KEY_ENV[config.LLM_PROVIDER]} set: only previously recorded reviews will have AI findings.")
@@ -133,7 +139,7 @@ with st.sidebar:
     if source == "Demo project":
         st.caption("A small shop module with seeded bugs and an existing test suite.")
         if st.button("Review demo", type="primary", use_container_width=True):
-            run_review(lambda: loader.from_directory(DEMO_DIR))
+            run_review(lambda: loader.from_directory(DEMO_DIR), is_demo=True)
     elif source == "Paste code":
         code = st.text_area("Python code", height=300, placeholder="def f(x):\n    ...")
         name = st.text_input("File name", "snippet.py")
@@ -166,7 +172,11 @@ if rev is None:
 st.subheader(f"Review of `{rev.source_name}`")
 st.caption(f"{len(rev.files)} file{'s' if len(rev.files) != 1 else ''} reviewed · {rev.loc} lines of code · {rev.duration_ms} ms · mode: {rev.mode}")
 for err in rev.engine_errors:
-    st.warning(f"Engine **{err.engine}** failed and was skipped: {err.message}")
+    if "No recorded response" in err.message:
+        st.info("No recorded AI response for this code, so this review shows the deterministic engines only. "
+                "AI findings for new code need Live mode with an API key.")
+    else:
+        st.warning(f"Engine **{err.engine}** failed and was skipped: {err.message}")
 if st.session_state.get("skipped"):
     st.info("Not reviewed (unsupported or not Python): " + ", ".join(st.session_state.skipped))
 
@@ -220,7 +230,13 @@ with st.container(border=True):
     )
     if ws is None:
         st.caption("Loaded from history: run the review again to generate fixes.")
-    if st.button("Generate & verify fixes", type="primary", disabled=ws is None or not chosen or ai_mode() == "offline"):
+    locked = config.PUBLIC_MODE and not st.session_state.get("is_demo")
+    if locked:
+        st.info("In this public demo, fixes run only on the demo project: verifying a fix executes the "
+                "project's tests, and we don't run uploaded code on a shared server. Run PatchPilot locally "
+                "to fix your own code.")
+    if st.button("Generate & verify fixes", type="primary",
+                 disabled=ws is None or not chosen or ai_mode() == "offline" or locked):
         with st.status("Fixing and verifying…", expanded=True) as status:
             rev = fix_and_verify(ws, rev, chosen, progress=lambda stage, msg: st.write(msg), mode=ai_mode())
             status.update(label="Verification complete", state="complete", expanded=False)
