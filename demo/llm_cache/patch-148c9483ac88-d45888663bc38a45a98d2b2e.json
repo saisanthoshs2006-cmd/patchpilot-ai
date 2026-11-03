@@ -1,0 +1,5 @@
+{
+ "model": "openai/gpt-oss-120b",
+ "tag": "patch-148c9483ac88",
+ "response_text": "{\"new_imports\":[\"import os\"],\"rationale\":\"Replaced insecure MD5 hashing with PBKDF2-HMAC-SHA256 using a random salt, returning salt and hash separated by a colon to avoid weak MD5 usage.\",\"replacement_code\":\"def hash_password(password):\\n    salt = os.urandom(16)\\n    key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100_000)\\n    return f\\\"{salt.hex()}:{key.hex()}\\\"\",\"test_code\":\"import pytest\\nfrom orders import hash_password\\n\\ndef test_hash_password_is_not_md5():\\n    hp = hash_password(\\\"password123\\\")\\n    assert \\\":\\\" in hp, \\\"hash_password should return salt and hash separated by ':'\\\"\\n    salt_hex, key_hex = hp.split(\\\":\\\")\\n    assert len(salt_hex) == 32\\n    assert len(key_hex) == 64\\n\"}"
+}

@@ -1,0 +1,5 @@
+{
+ "model": "openai/gpt-oss-120b",
+ "tag": "patch-85c9f5fef5df",
+ "response_text": "{\n  \"replacement_code\": \"def parse_quantity(value):\\n    try:\\n        return int(value)\\n    except (ValueError, TypeError):\\n        return None\",\n  \"new_imports\": [],\n  \"rationale\": \"Replaced the bare except with specific exception handling for ValueError and TypeError, ensuring only expected conversion errors are caught and other exceptions propagate.\",\n  \"test_code\": \"import pytest\\nfrom orders import parse_quantity\\n\\ndef test_parse_quantity_valid():\\n    assert parse_quantity('42') == 42\\n    assert parse_quantity(7) == 7\\n\\ndef test_parse_quantity_invalid_returns_none():\\n    assert parse_quantity('not-a-number') is None\\n    assert parse_quantity(None) is None\\n\\ndef test_parse_quantity_propagates_unexpected_exceptions():\\n    class BadInt:\\n        def __int__(self):\\n            raise RuntimeError('unexpected')\\n    with pytest.raises(RuntimeError):\\n        parse_quantity(BadInt())\"\n}"
+}

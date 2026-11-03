@@ -1,0 +1,5 @@
+{
+ "model": "openai/gpt-oss-120b",
+ "tag": "patch-148c9483ac88",
+ "response_text": "{\"replacement_code\":\"def hash_password(password):\\n    \\\"\\\"\\\"Hash a password using SHA-256.\\n\\n    Returns the hexadecimal digest of the SHA-256 hash of the\\n    provided password. This replaces the insecure MD5 hashing.\\n    \\\"\\\"\\\"\\n    return hashlib.sha256(password.encode()).hexdigest()\",\"new_imports\":[],\"rationale\":\"Replaced insecure MD5 hashing with SHA-256, which is suitable for integrity checks and avoids the CWE-327 weak hash issue.\",\"test_code\":\"import hashlib\\nfrom orders import hash_password\\n\\ndef test_hash_password():\\n    password = \\\"test_password\\\"\\n    expected = hashlib.sha256(password.encode()).hexdigest()\\n    assert hash_password(password) == expected\"}"
+}

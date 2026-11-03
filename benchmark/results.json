@@ -1,0 +1,770 @@
+{
+ "model": "openai/gpt-oss-120b",
+ "provider": "groq",
+ "mode": "auto",
+ "files": 8,
+ "defects": 32,
+ "configs": {
+  "tools": {
+   "precision": 0.905,
+   "recall": 0.594,
+   "f1": 0.717,
+   "raw_precision": 0.905,
+   "tp": 19,
+   "fp": 2,
+   "found": 19,
+   "total_defects": 32,
+   "rejected_claims": 0,
+   "duration_ms": 1434,
+   "tokens": 0,
+   "errors": [],
+   "recall_by_family": {
+    "correctness": [
+     6,
+     17
+    ],
+    "security": [
+     7,
+     8
+    ],
+    "performance": [
+     2,
+     3
+    ],
+    "quality": [
+     4,
+     4
+    ]
+   }
+  },
+  "ai_only": {
+   "precision": 0.897,
+   "recall": 0.812,
+   "f1": 0.852,
+   "raw_precision": 0.867,
+   "tp": 26,
+   "fp": 3,
+   "found": 26,
+   "total_defects": 32,
+   "rejected_claims": 1,
+   "duration_ms": 319445,
+   "tokens": 11774,
+   "errors": [],
+   "recall_by_family": {
+    "correctness": [
+     16,
+     17
+    ],
+    "security": [
+     7,
+     8
+    ],
+    "performance": [
+     1,
+     3
+    ],
+    "quality": [
+     2,
+     4
+    ]
+   }
+  },
+  "hybrid": {
+   "precision": 0.879,
+   "recall": 0.906,
+   "f1": 0.892,
+   "raw_precision": 0.879,
+   "tp": 29,
+   "fp": 4,
+   "found": 29,
+   "total_defects": 32,
+   "rejected_claims": 0,
+   "duration_ms": 23358,
+   "tokens": 6367,
+   "errors": [],
+   "recall_by_family": {
+    "correctness": [
+     16,
+     17
+    ],
+    "security": [
+     7,
+     8
+    ],
+    "performance": [
+     2,
+     3
+    ],
+    "quality": [
+     4,
+     4
+    ]
+   }
+  }
+ },
+ "details": {
+  "tools": {
+   "judged": [
+    {
+     "file": "auth.py",
+     "line": 23,
+     "rule_id": "bandit:B506",
+     "title": "yaml.load without SafeLoader",
+     "verdict": "yaml-unsafe-load"
+    },
+    {
+     "file": "auth.py",
+     "line": 27,
+     "rule_id": "bandit:B307",
+     "title": "Use of eval()",
+     "verdict": "eval-user-expression"
+    },
+    {
+     "file": "auth.py",
+     "line": 9,
+     "rule_id": "bandit:B105",
+     "title": "Hardcoded password or secret",
+     "verdict": "hardcoded-secret"
+    },
+    {
+     "file": "auth.py",
+     "line": 14,
+     "rule_id": "bandit:B311",
+     "title": "Non-cryptographic random generator",
+     "verdict": "insecure-random-token"
+    },
+    {
+     "file": "billing.py",
+     "line": 26,
+     "rule_id": "ruff:B006",
+     "title": "Mutable default argument",
+     "verdict": "mutable-default-lines"
+    },
+    {
+     "file": "billing.py",
+     "line": 18,
+     "rule_id": "ast:division-by-len-unguarded",
+     "title": "ZeroDivisionError when `invoices` is empty",
+     "verdict": "average-empty-zero-division"
+    },
+    {
+     "file": "reports.py",
+     "line": 26,
+     "rule_id": "ruff:PERF401",
+     "title": "Use `list.extend` to create a transformed list",
+     "verdict": "FP"
+    },
+    {
+     "file": "reports.py",
+     "line": 39,
+     "rule_id": "ruff:SIM115",
+     "title": "File opened without a context manager",
+     "verdict": "open-without-with"
+    },
+    {
+     "file": "reports.py",
+     "line": 9,
+     "rule_id": "ast:list-membership-in-loop",
+     "title": "O(n\u00b2) membership test on list `regions` inside a loop",
+     "verdict": "list-membership-in-loop"
+    },
+    {
+     "file": "reports.py",
+     "line": 17,
+     "rule_id": "ast:str-concat-in-loop",
+     "title": "String `out` built with += inside a loop",
+     "verdict": "string-concat-in-loop"
+    },
+    {
+     "file": "users.py",
+     "line": 18,
+     "rule_id": "ruff:E722",
+     "title": "Bare except",
+     "verdict": "bare-except"
+    },
+    {
+     "file": "users.py",
+     "line": 27,
+     "rule_id": "ast:unreachable-code",
+     "title": "Unreachable code after the `if` block",
+     "verdict": "unreachable-print"
+    },
+    {
+     "file": "users.py",
+     "line": 8,
+     "rule_id": "ast:unchecked-optional",
+     "title": "Possible None dereference of re.match(...)",
+     "verdict": "regex-match-not-checked"
+    },
+    {
+     "file": "users.py",
+     "line": 23,
+     "rule_id": "ruff:SIM103",
+     "title": "Return the condition `age >= 18` directly",
+     "verdict": "needless-bool-branches"
+    },
+    {
+     "file": "users.py",
+     "line": 15,
+     "rule_id": "ast:inconsistent-return",
+     "title": "`parse_age` sometimes returns a value, sometimes None",
+     "verdict": "parse-age-returns-none"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 24,
+     "rule_id": "ast:sql-string-to-execute",
+     "title": "SQL injection via string-built query",
+     "verdict": "sql-injection-percent-format"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 19,
+     "rule_id": "ruff:B023",
+     "title": "Closure captures loop variable",
+     "verdict": "lambda-late-binding"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 19,
+     "rule_id": "ruff:PERF401",
+     "title": "Use a list comprehension to create a transformed list",
+     "verdict": "FP"
+    },
+    {
+     "file": "cache.py",
+     "line": 33,
+     "rule_id": "ruff:F632",
+     "title": "Use `==` to compare constant literals",
+     "verdict": "is-literal-comparison"
+    },
+    {
+     "file": "parser.py",
+     "line": 25,
+     "rule_id": "bandit:B602",
+     "title": "Shell command injection (shell=True)",
+     "verdict": "shell-injection"
+    },
+    {
+     "file": "parser.py",
+     "line": 21,
+     "rule_id": "bandit:B301",
+     "title": "Unsafe pickle deserialization",
+     "verdict": "pickle-untrusted"
+    }
+   ],
+   "missed": [
+    "inventory.py:range-skips-first-item",
+    "inventory.py:low-stock-uses-lte",
+    "inventory.py:get-result-indexed-without-check",
+    "auth.py:timing-unsafe-compare",
+    "auth.py:is-admin-or-instead-of-and",
+    "billing.py:tax-before-discount",
+    "billing.py:to-cents-truncates",
+    "reports.py:nested-loop-join",
+    "scheduler.py:weekend-check-inverted",
+    "scheduler.py:shift-across-midnight-negative",
+    "scheduler.py:inclusive-range-off-by-one",
+    "cache.py:ttl-check-inverted",
+    "cache.py:evicts-newest-not-oldest"
+   ]
+  },
+  "ai_only": {
+   "judged": [
+    {
+     "file": "inventory.py",
+     "line": 9,
+     "rule_id": "ai:bug",
+     "title": "total_units skips first item, undercounting total",
+     "verdict": "range-skips-first-item"
+    },
+    {
+     "file": "inventory.py",
+     "line": 21,
+     "rule_id": "ai:runtime_error",
+     "title": "find_sku raises TypeError when SKU is missing",
+     "verdict": "get-result-indexed-without-check"
+    },
+    {
+     "file": "inventory.py",
+     "line": 16,
+     "rule_id": "ai:bug",
+     "title": "is_low_stock includes items equal to threshold contrary to docstring",
+     "verdict": "low-stock-uses-lte"
+    },
+    {
+     "file": "auth.py",
+     "line": 23,
+     "rule_id": "ai:security",
+     "title": "Unsafe yaml.load enables arbitrary code execution",
+     "verdict": "yaml-unsafe-load"
+    },
+    {
+     "file": "auth.py",
+     "line": 27,
+     "rule_id": "ai:security",
+     "title": "Eval on user-controlled expression allows code execution",
+     "verdict": "eval-user-expression"
+    },
+    {
+     "file": "auth.py",
+     "line": 14,
+     "rule_id": "ai:security",
+     "title": "make_session_token uses non\u2011cryptographic random generator",
+     "verdict": "insecure-random-token"
+    },
+    {
+     "file": "auth.py",
+     "line": 36,
+     "rule_id": "ai:bug",
+     "title": "is_admin uses OR instead of AND, violating admin check",
+     "verdict": "is-admin-or-instead-of-and"
+    },
+    {
+     "file": "auth.py",
+     "line": 18,
+     "rule_id": "ai:security",
+     "title": "Simple equality check vulnerable to timing attacks",
+     "verdict": "timing-unsafe-compare"
+    },
+    {
+     "file": "billing.py",
+     "line": 8,
+     "rule_id": "ai:bug",
+     "title": "Discount applied after tax instead of before",
+     "verdict": "tax-before-discount"
+    },
+    {
+     "file": "billing.py",
+     "line": 14,
+     "rule_id": "ai:runtime_error",
+     "title": "Division by zero when splitting among zero people",
+     "verdict": "ignored"
+    },
+    {
+     "file": "billing.py",
+     "line": 26,
+     "rule_id": "ai:code_smell",
+     "title": "Mutable default argument leads to shared state across calls",
+     "verdict": "mutable-default-lines"
+    },
+    {
+     "file": "billing.py",
+     "line": 23,
+     "rule_id": "ai:bug",
+     "title": "Incorrect rounding when converting to cents",
+     "verdict": "to-cents-truncates"
+    },
+    {
+     "file": "reports.py",
+     "line": 39,
+     "rule_id": "ai:maintainability",
+     "title": "File opened without a context manager, may leak descriptor",
+     "verdict": "open-without-with"
+    },
+    {
+     "file": "reports.py",
+     "line": 39,
+     "rule_id": "ai:security",
+     "title": "Unvalidated file path enables path\u2011traversal attacks",
+     "verdict": "FP"
+    },
+    {
+     "file": "reports.py",
+     "line": 17,
+     "rule_id": "ai:bug",
+     "title": "CSV fields are not escaped, producing malformed output",
+     "verdict": "FP"
+    },
+    {
+     "file": "reports.py",
+     "line": 23,
+     "rule_id": "ai:performance",
+     "title": "Nested loops cause O(N*M) matching",
+     "verdict": "nested-loop-join"
+    },
+    {
+     "file": "reports.py",
+     "line": 33,
+     "rule_id": "ai:performance",
+     "title": "Regex compiled on every loop iteration",
+     "verdict": "ignored"
+    },
+    {
+     "file": "users.py",
+     "line": 8,
+     "rule_id": "ai:bug",
+     "title": "parse_username crashes on invalid email",
+     "verdict": "regex-match-not-checked"
+    },
+    {
+     "file": "users.py",
+     "line": 19,
+     "rule_id": "ai:bug",
+     "title": "parse_age silently returns None on conversion error",
+     "verdict": "parse-age-returns-none"
+    },
+    {
+     "file": "users.py",
+     "line": 32,
+     "rule_id": "ai:bug",
+     "title": "initials fails on names with consecutive spaces",
+     "verdict": "FP"
+    },
+    {
+     "file": "users.py",
+     "line": 27,
+     "rule_id": "ai:code_smell",
+     "title": "Unreachable print statement in is_adult",
+     "verdict": "unreachable-print"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 24,
+     "rule_id": "ai:security",
+     "title": "SQL injection vulnerability in query construction",
+     "verdict": "sql-injection-percent-format"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 13,
+     "rule_id": "ai:bug",
+     "title": "Shift hours calculation fails for midnight crossing",
+     "verdict": "shift-across-midnight-negative"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 19,
+     "rule_id": "ai:bug",
+     "title": "Lambda captures loop variable by reference",
+     "verdict": "lambda-late-binding"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 8,
+     "rule_id": "ai:bug",
+     "title": "Incorrect weekend detection logic",
+     "verdict": "weekend-check-inverted"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 30,
+     "rule_id": "ai:bug",
+     "title": "Off\u2011by\u2011one error for inclusive day count",
+     "verdict": "inclusive-range-off-by-one"
+    },
+    {
+     "file": "cache.py",
+     "line": 17,
+     "rule_id": "ai:bug",
+     "title": "TTL check reversed causing premature eviction",
+     "verdict": "ttl-check-inverted"
+    },
+    {
+     "file": "cache.py",
+     "line": 24,
+     "rule_id": "ai:bug",
+     "title": "Evicts newest entry instead of oldest",
+     "verdict": "evicts-newest-not-oldest"
+    },
+    {
+     "file": "cache.py",
+     "line": 33,
+     "rule_id": "ai:bug",
+     "title": "Uses identity operator for integer comparison",
+     "verdict": "is-literal-comparison"
+    },
+    {
+     "file": "parser.py",
+     "line": 21,
+     "rule_id": "ai:security",
+     "title": "Unsafe pickle deserialization",
+     "verdict": "pickle-untrusted"
+    },
+    {
+     "file": "parser.py",
+     "line": 25,
+     "rule_id": "ai:security",
+     "title": "Command injection via shell=True",
+     "verdict": "shell-injection"
+    },
+    {
+     "file": "parser.py",
+     "line": 15,
+     "rule_id": "ai:bug",
+     "title": "ValueError on malformed pair",
+     "verdict": "ignored"
+    },
+    {
+     "file": "parser.py",
+     "line": 8,
+     "rule_id": "ai:bug",
+     "title": "IndexError on empty string",
+     "verdict": "ignored"
+    }
+   ],
+   "missed": [
+    "auth.py:hardcoded-secret",
+    "billing.py:average-empty-zero-division",
+    "reports.py:list-membership-in-loop",
+    "reports.py:string-concat-in-loop",
+    "users.py:bare-except",
+    "users.py:needless-bool-branches"
+   ]
+  },
+  "hybrid": {
+   "judged": [
+    {
+     "file": "inventory.py",
+     "line": 9,
+     "rule_id": "ai:bug",
+     "title": "total_units omits first item when summing quantities",
+     "verdict": "range-skips-first-item"
+    },
+    {
+     "file": "inventory.py",
+     "line": 16,
+     "rule_id": "ai:bug",
+     "title": "is_low_stock uses <= instead of < per docstring",
+     "verdict": "low-stock-uses-lte"
+    },
+    {
+     "file": "inventory.py",
+     "line": 21,
+     "rule_id": "ai:runtime_error",
+     "title": "find_sku raises TypeError for missing SKU",
+     "verdict": "get-result-indexed-without-check"
+    },
+    {
+     "file": "auth.py",
+     "line": 23,
+     "rule_id": "bandit:B506",
+     "title": "yaml.load without SafeLoader",
+     "verdict": "yaml-unsafe-load"
+    },
+    {
+     "file": "auth.py",
+     "line": 27,
+     "rule_id": "bandit:B307",
+     "title": "Use of eval()",
+     "verdict": "eval-user-expression"
+    },
+    {
+     "file": "auth.py",
+     "line": 36,
+     "rule_id": "ai:bug",
+     "title": "Incorrect admin check uses OR instead of AND",
+     "verdict": "is-admin-or-instead-of-and"
+    },
+    {
+     "file": "auth.py",
+     "line": 9,
+     "rule_id": "bandit:B105",
+     "title": "Hardcoded password or secret",
+     "verdict": "hardcoded-secret"
+    },
+    {
+     "file": "auth.py",
+     "line": 14,
+     "rule_id": "bandit:B311",
+     "title": "Non-cryptographic random generator",
+     "verdict": "insecure-random-token"
+    },
+    {
+     "file": "billing.py",
+     "line": 8,
+     "rule_id": "ai:bug",
+     "title": "Discount applied after tax, contrary to docstring",
+     "verdict": "tax-before-discount"
+    },
+    {
+     "file": "billing.py",
+     "line": 23,
+     "rule_id": "ai:bug",
+     "title": "Conversion to cents truncates instead of rounding",
+     "verdict": "to-cents-truncates"
+    },
+    {
+     "file": "billing.py",
+     "line": 26,
+     "rule_id": "ruff:B006",
+     "title": "Mutable default argument",
+     "verdict": "mutable-default-lines"
+    },
+    {
+     "file": "billing.py",
+     "line": 18,
+     "rule_id": "ast:division-by-len-unguarded",
+     "title": "ZeroDivisionError when `invoices` is empty",
+     "verdict": "average-empty-zero-division"
+    },
+    {
+     "file": "reports.py",
+     "line": 44,
+     "rule_id": "ai:bug",
+     "title": "top_n mishandles negative n values",
+     "verdict": "FP"
+    },
+    {
+     "file": "reports.py",
+     "line": 26,
+     "rule_id": "ruff:PERF401",
+     "title": "Use `list.extend` to create a transformed list",
+     "verdict": "FP"
+    },
+    {
+     "file": "reports.py",
+     "line": 39,
+     "rule_id": "ruff:SIM115",
+     "title": "File opened without a context manager",
+     "verdict": "open-without-with"
+    },
+    {
+     "file": "reports.py",
+     "line": 9,
+     "rule_id": "ast:list-membership-in-loop",
+     "title": "O(n\u00b2) membership test on list `regions` inside a loop",
+     "verdict": "list-membership-in-loop"
+    },
+    {
+     "file": "reports.py",
+     "line": 17,
+     "rule_id": "ast:str-concat-in-loop",
+     "title": "String `out` built with += inside a loop",
+     "verdict": "string-concat-in-loop"
+    },
+    {
+     "file": "users.py",
+     "line": 12,
+     "rule_id": "ai:runtime_error",
+     "title": "display_name crashes with KeyError on missing keys",
+     "verdict": "ignored"
+    },
+    {
+     "file": "users.py",
+     "line": 18,
+     "rule_id": "ruff:E722",
+     "title": "Bare except",
+     "verdict": "bare-except"
+    },
+    {
+     "file": "users.py",
+     "line": 27,
+     "rule_id": "ast:unreachable-code",
+     "title": "Unreachable code after the `if` block",
+     "verdict": "unreachable-print"
+    },
+    {
+     "file": "users.py",
+     "line": 8,
+     "rule_id": "ast:unchecked-optional",
+     "title": "Possible None dereference of re.match(...)",
+     "verdict": "regex-match-not-checked"
+    },
+    {
+     "file": "users.py",
+     "line": 23,
+     "rule_id": "ruff:SIM103",
+     "title": "Return the condition `age >= 18` directly",
+     "verdict": "needless-bool-branches"
+    },
+    {
+     "file": "users.py",
+     "line": 15,
+     "rule_id": "ast:inconsistent-return",
+     "title": "`parse_age` sometimes returns a value, sometimes None",
+     "verdict": "parse-age-returns-none"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 24,
+     "rule_id": "ast:sql-string-to-execute",
+     "title": "SQL injection via string-built query",
+     "verdict": "sql-injection-percent-format"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 19,
+     "rule_id": "ruff:B023",
+     "title": "Closure captures loop variable",
+     "verdict": "lambda-late-binding"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 8,
+     "rule_id": "ai:bug",
+     "title": "Incorrect weekend detection logic",
+     "verdict": "weekend-check-inverted"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 13,
+     "rule_id": "ai:bug",
+     "title": "shift_hours fails for shifts crossing midnight",
+     "verdict": "shift-across-midnight-negative"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 30,
+     "rule_id": "ai:bug",
+     "title": "Off-by-one error in days_between",
+     "verdict": "inclusive-range-off-by-one"
+    },
+    {
+     "file": "scheduler.py",
+     "line": 19,
+     "rule_id": "ruff:PERF401",
+     "title": "Use a list comprehension to create a transformed list",
+     "verdict": "FP"
+    },
+    {
+     "file": "cache.py",
+     "line": 17,
+     "rule_id": "ai:bug",
+     "title": "TTL check inverted, causing fresh entries to be treated as expired",
+     "verdict": "ttl-check-inverted"
+    },
+    {
+     "file": "cache.py",
+     "line": 33,
+     "rule_id": "ruff:F632",
+     "title": "Use `==` to compare constant literals",
+     "verdict": "is-literal-comparison"
+    },
+    {
+     "file": "parser.py",
+     "line": 25,
+     "rule_id": "bandit:B602",
+     "title": "Shell command injection (shell=True)",
+     "verdict": "shell-injection"
+    },
+    {
+     "file": "parser.py",
+     "line": 21,
+     "rule_id": "bandit:B301",
+     "title": "Unsafe pickle deserialization",
+     "verdict": "pickle-untrusted"
+    },
+    {
+     "file": "parser.py",
+     "line": 15,
+     "rule_id": "ai:bug",
+     "title": "parse_pairs crashes on empty string input",
+     "verdict": "ignored"
+    },
+    {
+     "file": "parser.py",
+     "line": 35,
+     "rule_id": "ai:bug",
+     "title": "chunk fails with size zero",
+     "verdict": "FP"
+    }
+   ],
+   "missed": [
+    "auth.py:timing-unsafe-compare",
+    "reports.py:nested-loop-join",
+    "cache.py:evicts-newest-not-oldest"
+   ]
+  }
+ }
+}

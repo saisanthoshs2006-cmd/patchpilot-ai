@@ -1,0 +1,5 @@
+{
+ "model": "openai/gpt-oss-120b",
+ "tag": "patch-2a9ccfc34636",
+ "response_text": "{\"replacement_code\":\"def needs_restock(stock, threshold):\\n    \\\"\\\"\\\"Return True when stock has fallen to or below the reorder threshold.\\\"\\\"\\\"\\n    return stock <= threshold\",\"new_imports\":[],\"rationale\":\"Changed the comparison to <= so the function returns True when stock is at or below the threshold, matching the docstring behavior.\",\"test_code\":\"import pytest\\nfrom orders import needs_restock\\n\\ndef test_needs_restock_true_at_threshold():\\n    assert needs_restock(5, 5) is True\\n\\ndef test_needs_restock_false_above_threshold():\\n    assert needs_restock(10, 5) is False\"}"
+}

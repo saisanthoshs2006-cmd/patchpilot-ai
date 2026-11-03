@@ -1,0 +1,5 @@
+{
+ "model": "openai/gpt-oss-120b",
+ "tag": "patch-f10840378cac",
+ "response_text": "{\"replacement_code\":\"def add_tag(order, tag, tags=None):\\n    if tags is None:\\n        tags = []\\n    tags.append(tag)\\n    order[\\\"tags\\\"] = tags\\n    return order\",\"new_imports\":[],\"rationale\":\"Changed the mutable default argument to None and create a new list inside the function to avoid shared state across calls.\",\"test_code\":\"import pytest\\nfrom orders import add_tag\\n\\ndef test_add_tag_mutable_default():\\n    order1 = {\\\"id\\\": 1}\\n    order2 = {\\\"id\\\": 2}\\n    add_tag(order1, \\\"tag1\\\")\\n    add_tag(order2, \\\"tag2\\\")\\n    assert order1[\\\"tags\\\"] == [\\\"tag1\\\"]\\n    assert order2[\\\"tags\\\"] == [\\\"tag2\\\"]\\n\"}"
+}

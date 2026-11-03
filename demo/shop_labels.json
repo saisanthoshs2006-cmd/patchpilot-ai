@@ -1,0 +1,21 @@
+{
+  "_comment": "Ground truth for demo/shop. Kept OUTSIDE demo/shop so it is never uploaded with the code or shown to the LLM. 'expected_detector' records which engine should catch it, verified against ruff 0.17.3 / bandit 1.9 on 2026-11-03.",
+  "file": "orders.py",
+  "issues": [
+    {"line": 10, "category": "security",      "severity": "medium",   "expected_detector": "tool", "id": "hardcoded-password"},
+    {"line": 19, "category": "security",      "severity": "critical", "expected_detector": "tool", "id": "sql-injection"},
+    {"line": 25, "category": "security",      "severity": "high",     "expected_detector": "tool", "id": "md5-password-hash"},
+    {"line": 29, "category": "security",      "severity": "high",     "expected_detector": "tool", "id": "pickle-untrusted"},
+    {"line": 33, "category": "security",      "severity": "critical", "expected_detector": "tool", "id": "shell-injection"},
+    {"line": 38, "category": "bug",           "severity": "high",     "expected_detector": "ai",   "id": "paginate-off-by-one"},
+    {"line": 48, "category": "runtime_error", "severity": "medium",   "expected_detector": "ast",  "id": "average-zero-division"},
+    {"line": 53, "category": "bug",           "severity": "high",     "expected_detector": "ai",   "id": "restock-inverted-comparison"},
+    {"line": 56, "category": "bug",           "severity": "medium",   "expected_detector": "tool", "id": "mutable-default-arg"},
+    {"line": 65, "category": "performance",   "severity": "low",      "expected_detector": "ast",  "id": "list-membership-in-loop"},
+    {"line": 82, "category": "best_practice", "severity": "low",      "expected_detector": "tool", "id": "open-without-with"},
+    {"line": 90, "category": "performance",   "severity": "low",      "expected_detector": "ast",  "id": "str-concat-in-loop"},
+    {"line": 94, "category": "code_smell",    "severity": "low",      "expected_detector": "ast",  "id": "inconsistent-return"},
+    {"line": 97, "category": "code_smell",    "severity": "medium",   "expected_detector": "tool", "id": "bare-except-swallow"}
+  ],
+  "negative_controls": ["order_total", "apply_discount", "get_connection"]
+}

@@ -1,0 +1,5 @@
+{
+ "model": "openai/gpt-oss-120b",
+ "tag": "cache.py-__init__",
+ "response_text": "{\"findings\":[{\"function\":\"get\",\"line\":17,\"quoted_code\":\"if time.time() - stored_at < self.ttl:\",\"category\":\"bug\",\"severity\":\"high\",\"title\":\"TTL check inverted, causing fresh entries to be treated as expired\",\"explanation\":\"The condition uses '<' instead of '>' so entries that are still within their TTL are deleted and None is returned.\",\"why_it_matters\":\"Cache returns None for valid entries and keeps stale entries, breaking expected caching behavior and potentially causing data loss.\",\"suggested_fix\":\"Change the comparison to '>' (e.g., if time.time() - stored_at > self.ttl:).\",\"failing_input\":\"c = Cache(1, 10); c.put('x', 42); c.get('x')\",\"expected_behavior\":\"Should return the stored value (42) because the entry has not expired.\",\"actual_behavior\":\"Returns None and deletes the entry due to the inverted TTL condition.\",\"confidence\":0.96}]}"
+}

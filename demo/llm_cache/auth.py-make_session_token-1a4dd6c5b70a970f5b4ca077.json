@@ -1,0 +1,5 @@
+{
+ "model": "openai/gpt-oss-120b",
+ "tag": "auth.py-make_session_token",
+ "response_text": "{\"findings\":[{\"function\":\"is_admin\",\"line\":36,\"quoted_code\":\"    return user[\\\"role\\\"] == \\\"admin\\\" or user[\\\"active\\\"]\",\"category\":\"bug\",\"severity\":\"high\",\"title\":\"Incorrect admin check uses OR instead of AND\",\"explanation\":\"The function's docstring states that a user is admin only if they have the admin role AND an active account, but the implementation returns True when either condition is true, allowing inactive admins or active non-admin users to be considered admin.\",\"why_it_matters\":\"Allows unauthorized users to gain admin privileges, leading to security breaches and potential data compromise.\",\"suggested_fix\":\"Replace the logical OR with AND: `return user[\\\"role\\\"] == \\\"admin\\\" and user[\\\"active\\\"]`.\",\"failing_input\":\"is_admin({\\\"role\\\": \\\"user\\\", \\\"active\\\": True})\",\"expected_behavior\":\"False (user is not admin because role is not admin)\",\"actual_behavior\":\"True (function returns True due to OR)\",\"confidence\":0.98}]}"
+}

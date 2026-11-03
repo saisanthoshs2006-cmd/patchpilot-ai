@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PatchPilot review: {{ rev.source_name }}</title>
+<style>
+  :root { --bg:#fff; --fg:#1d2330; --muted:#5e6676; --line:#e2e5ea; --card:#f7f8fa;
+          --crit:#b42318; --high:#d9480f; --med:#b7791f; --low:#2b6cb0; --info:#6b7280; --ok:#1f7a3f; --bad:#b42318; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --fg:#e6e8ec; --muted:#9aa2b1; --line:#2a2f38; --card:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; } h2 { font-size: 18px; margin: 32px 0 8px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .scores { display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 16px 0; }
+  .score { background: var(--card); border:1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  .score b { display:block; font-size: 22px; font-variant-numeric: tabular-nums; }
+  .card { border:1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: var(--card); }
+  .card h3 { margin: 0 0 6px; font-size: 15px; }
+  .badge { display:inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em;
+           padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; margin-right: 4px; }
+  .critical { color: var(--crit); } .high { color: var(--high); } .medium { color: var(--med); }
+  .low { color: var(--low); } .info { color: var(--info); }
+  .proven, .static_pass { color: var(--ok); } .failed { color: var(--bad); } .inconclusive { color: var(--muted); }
+  dl { display:grid; grid-template-columns: 130px 1fr; gap: 2px 12px; margin: 8px 0 0; font-size: 14px; }
+  dt { color: var(--muted); }  dd { margin: 0; }
+  pre { background: var(--bg); border:1px solid var(--line); border-radius: 6px; padding: 8px 10px; overflow-x: auto;
+        font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  td, th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Review of <code>{{ rev.source_name }}</code></h1>
+  <div class="muted">
+    {{ rev.created_at.strftime("%Y-%m-%d %H:%M UTC") }} · {{ rev.files|length }} file{{ "s" if rev.files|length != 1 }} ·
+    {{ rev.loc }} lines · {{ rev.duration_ms }} ms · AI mode: {{ rev.mode }} · PatchPilot {{ version }}
+  </div>
+
+  <div class="scores">
+    <div class="score">Overall<b>{{ "%.0f"|format(rev.scores.overall) }}</b>
+      {% if rev.metrics.projected_overall is defined %}<span class="muted">{{ "%.0f"|format(rev.metrics.projected_overall) }} with verified fixes</span>{% endif %}</div>
+    {% for label, v in [("Security", rev.scores.security), ("Reliability", rev.scores.reliability),
+                         ("Performance", rev.scores.performance), ("Maintainability", rev.scores.maintainability),
+                         ("Style", rev.scores.style)] %}
+      <div class="score">{{ label }}<b>{{ "%.0f"|format(v) }}</b></div>
+    {% endfor %}
+  </div>
+  <p>
+    {% for s in severities %}<span class="badge {{ s.value }}">{{ sev_counts.get(s, 0) }} {{ s.value }}</span>{% endfor %}
+  </p>
+  {% if rev.verifications %}
+    <p>Fixes: {% for k, n in fix_counts.items() %}<span class="badge {{ k }}">{{ n }} {{ k.replace("_", " ") }}</span>{% endfor %}</p>
+  {% endif %}
+  {% for e in rev.engine_errors %}<p class="failed">Engine {{ e.engine }} failed and was skipped: {{ e.message }}</p>{% endfor %}
+
+  {% macro finding(f) %}
+    {% set p = patches.get(f.id) %}{% set v = verifications.get(f.id) %}
+    <div class="card">
+      <h3>
+        <span class="badge {{ f.severity.value }}">{{ f.severity.value }}</span>
+        <span class="badge info">{{ f.evidence_level.value.replace("_", " ") }}</span>
+        {% if v %}<span class="badge {{ v.status.value }}">fix {{ v.status.value.replace("_", " ") }}</span>{% endif %}
+        {{ f.title }}
+      </h3>
+      <div class="muted"><code>{{ f.file }}:{{ f.line }}</code>{% if f.function_name %} in <code>{{ f.function_name }}()</code>{% endif %}
+        · {{ f.category.value.replace("_", " ") }} · <code>{{ f.rule_id }}</code> · confidence {{ "%.0f"|format(f.confidence * 100) }}%
+        · from {{ f.sources|join(", ") }}</div>
+      {% if f.code_snippet %}<pre>{{ f.code_snippet }}</pre>{% endif %}
+      <dl>
+        <dt>What</dt><dd>{{ f.explanation }}</dd>
+        <dt>Why it matters</dt><dd>{{ f.why_it_matters }}</dd>
+        <dt>Suggested fix</dt><dd>{{ f.suggested_fix }}</dd>
+        {% if f.repro %}<dt>Failing input</dt><dd><code>{{ f.repro.call }}</code> — expected {{ f.repro.expected }}, got {{ f.repro.actual }}</dd>{% endif %}
+        <dt>Verification</dt><dd>{{ f.verification_status.value.replace("_", " ") }}</dd>
+      </dl>
+      {% if v %}
+        <details><summary>Verification steps</summary>
+          <table>{% for s in v.steps %}<tr><td>{{ s.step }}</td><td class="{{ 'proven' if s.status.value == 'pass' else ('failed' if s.status.value == 'fail' else 'inconclusive') }}">{{ s.status.value }}</td><td>{{ s.detail }}</td></tr>{% endfor %}</table>
+          {% for s in v.steps if s.test_code %}<pre>{{ s.test_code }}</pre>{% endfor %}
+        </details>
+      {% endif %}
+      {% if p %}<details><summary>Patch ({{ p.generated_by }})</summary><pre>{{ p.diff }}</pre></details>{% endif %}
+    </div>
+  {% endmacro %}
+
+  <h2>Confirmed findings ({{ confirmed|length }})</h2>
+  <p class="muted">Reported by a deterministic tool, corroborated by two engines, or proven by a failing test.</p>
+  {% for f in confirmed %}{{ finding(f) }}{% else %}<p class="muted">None.</p>{% endfor %}
+
+  {% if hypotheses %}
+    <h2>AI hypotheses: not yet proven ({{ hypotheses|length }})</h2>
+    <p class="muted">Suspected by the AI only. Each quotes a real line, but treat them as leads to investigate.</p>
+    {% for f in hypotheses %}{{ finding(f) }}{% endfor %}
+  {% endif %}
+
+  {% if rev.rejected_claims %}
+    <h2>Rejected claims ({{ rev.rejected_claims|length }})</h2>
+    <p class="muted">Claims that cited a line or quoted code not found in the file. Never shown as findings.</p>
+    <table><tr><th>Location</th><th>Claim</th><th>Source</th><th>Reason</th></tr>
+    {% for c in rev.rejected_claims %}<tr><td>{{ c.file }}:{{ c.line }}</td><td>{{ c.title }}</td><td>{{ c.source }}</td><td>{{ c.reason }}</td></tr>{% endfor %}
+    </table>
+  {% endif %}
+</main>
+</body>
+</html>

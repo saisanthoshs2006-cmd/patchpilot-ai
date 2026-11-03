@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PatchPilot review: shop</title>
+<style>
+  :root { --bg:#fff; --fg:#1d2330; --muted:#5e6676; --line:#e2e5ea; --card:#f7f8fa;
+          --crit:#b42318; --high:#d9480f; --med:#b7791f; --low:#2b6cb0; --info:#6b7280; --ok:#1f7a3f; --bad:#b42318; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --fg:#e6e8ec; --muted:#9aa2b1; --line:#2a2f38; --card:#1b1f26; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; } h2 { font-size: 18px; margin: 32px 0 8px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .scores { display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 16px 0; }
+  .score { background: var(--card); border:1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  .score b { display:block; font-size: 22px; font-variant-numeric: tabular-nums; }
+  .card { border:1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: var(--card); }
+  .card h3 { margin: 0 0 6px; font-size: 15px; }
+  .badge { display:inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em;
+           padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; margin-right: 4px; }
+  .critical { color: var(--crit); } .high { color: var(--high); } .medium { color: var(--med); }
+  .low { color: var(--low); } .info { color: var(--info); }
+  .proven, .static_pass { color: var(--ok); } .failed { color: var(--bad); } .inconclusive { color: var(--muted); }
+  dl { display:grid; grid-template-columns: 130px 1fr; gap: 2px 12px; margin: 8px 0 0; font-size: 14px; }
+  dt { color: var(--muted); }  dd { margin: 0; }
+  pre { background: var(--bg); border:1px solid var(--line); border-radius: 6px; padding: 8px 10px; overflow-x: auto;
+        font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  td, th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Review of <code>shop</code></h1>
+  <div class="muted">
+    2026-11-03 17:38 UTC · 1 file ·
+    66 lines · 196 ms · AI mode: replay · PatchPilot 0.4.0
+  </div>
+
+  <div class="scores">
+    <div class="score">Overall<b>58</b>
+      <span class="muted">78 with verified fixes</span></div>
+    
+      <div class="score">Security<b>20</b></div>
+    
+      <div class="score">Reliability<b>60</b></div>
+    
+      <div class="score">Performance<b>92</b></div>
+    
+      <div class="score">Maintainability<b>70</b></div>
+    
+      <div class="score">Style<b>95</b></div>
+    
+  </div>
+  <p>
+    <span class="badge critical">2 critical</span><span class="badge high">4 high</span><span class="badge medium">4 medium</span><span class="badge low">4 low</span><span class="badge info">2 info</span>
+  </p>
+  
+    <p>Fixes: <span class="badge static_pass">1 static pass</span><span class="badge proven">6 proven</span><span class="badge inconclusive">0 inconclusive</span><span class="badge failed">1 failed</span></p>
+  
+  
+
+  
+
+  <h2>Confirmed findings (16)</h2>
+  <p class="muted">Reported by a deterministic tool, corroborated by two engines, or proven by a failing test.</p>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge critical">critical</span>
+        <span class="badge info">proven</span>
+        <span class="badge proven">fix proven</span>
+        SQL injection via string-built query
+      </h3>
+      <div class="muted"><code>orders.py:19</code> in <code>find_customer()</code>
+        · security · <code>ast:sql-string-to-execute</code> · confidence 99%
+        · from bandit:B608, ast:sql-string-to-execute</div>
+      <pre>    query = f&#34;SELECT id, name, email FROM customers WHERE email = &#39;{email}&#39;&#34;</pre>
+      <dl>
+        <dt>What</dt><dd>A string built with formatting/concatenation is passed to `.execute()` on line 20; any variable inside it becomes SQL code.</dd>
+        <dt>Why it matters</dt><dd>Attacker-controlled input can read, modify or delete any data in the database (CWE-89).</dd>
+        <dt>Suggested fix</dt><dd>Use placeholders and pass values separately: `.execute(&#39;... = ?&#39;, (value,))`.</dd>
+        
+        <dt>Verification</dt><dd>proven</dd>
+      </dl>
+      
+        <details><summary>Verification steps</summary>
+          <table><tr><td>syntax</td><td class="proven">pass</td><td>patched file parses</td></tr><tr><td>static_rescan</td><td class="proven">pass</td><td>ast:sql-string-to-execute, bandit:B608 no longer reported; no new findings</td></tr><tr><td>repro</td><td class="proven">pass</td><td>test written by the model: red on original (AssertionError) → green on patch</td></tr><tr><td>regression</td><td class="proven">pass</td><td>project tests: 5 passed / 0 failed before, 5 / 0 after</td></tr></table>
+          <pre>import sqlite3
+import pytest
+from orders import find_customer
+
+def setup_db():
+    conn = sqlite3.connect(&#34;:memory:&#34;)
+    cursor = conn.cursor()
+    cursor.execute(
+        &#34;CREATE TABLE customers (id INTEGER PRIMARY KEY, name TEXT, email TEXT)&#34;
+    )
+    cursor.execute(
+        &#34;INSERT INTO customers (name, email) VALUES (?, ?)&#34;,
+        (&#34;Alice&#34;, &#34;alice@example.com&#34;),
+    )
+    conn.commit()
+    return conn
+
+def test_find_customer_normal():
+    conn = setup_db()
+    result = find_customer(conn, &#34;alice@example.com&#34;)
+    assert result[1] == &#34;Alice&#34;
+
+def test_find_customer_sql_injection():
+    conn = setup_db()
+    malicious_email = &#34;alice@example.com&#39; OR 1=1 --&#34;
+    result = find_customer(conn, malicious_email)
+    assert result is None</pre>
+        </details>
+      
+      <details><summary>Patch (openai/gpt-oss-120b)</summary><pre>--- a/orders.py
++++ b/orders.py
+@@ -16,8 +16,8 @@
+ 
+ def find_customer(conn, email):
+     cursor = conn.cursor()
+-    query = f&#34;SELECT id, name, email FROM customers WHERE email = &#39;{email}&#39;&#34;
+-    cursor.execute(query)
++    query = &#34;SELECT id, name, email FROM customers WHERE email = ?&#34;
++    cursor.execute(query, (email,))
+     return cursor.fetchone()
+ 
+ 
+</pre></details>
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge critical">critical</span>
+        <span class="badge info">tool confirmed</span>
+        <span class="badge failed">fix failed</span>
+        Shell command injection (shell=True)
+      </h3>
+      <div class="muted"><code>orders.py:33</code> in <code>export_report()</code>
+        · security · <code>bandit:B602</code> · confidence 90%
+        · from bandit:B602</div>
+      <pre>    subprocess.call(&#34;cat &#34; + filename + &#34; &gt; /tmp/report.txt&#34;, shell=True)</pre>
+      <dl>
+        <dt>What</dt><dd>subprocess call with shell=True identified, security issue. (CWE-78)</dd>
+        <dt>Why it matters</dt><dd>Input concatenated into a shell command lets an attacker run arbitrary commands on the server (CWE-78).</dd>
+        <dt>Suggested fix</dt><dd>Pass an argument list without shell=True, e.g. subprocess.run([&#39;cat&#39;, filename], check=True).</dd>
+        
+        <dt>Verification</dt><dd>failed</dd>
+      </dl>
+      
+        <details><summary>Verification steps</summary>
+          <table><tr><td>repair</td><td class="failed">fail</td><td>attempt 1 rejected: bandit:B602 no longer reported; new: bandit:B108 (medium), ruff:F401 (low)</td></tr><tr><td>syntax</td><td class="proven">pass</td><td>patched file parses</td></tr><tr><td>static_rescan</td><td class="failed">fail</td><td>bandit:B602 no longer reported; new: bandit:B108 (medium), bandit:B607 (low), bandit:B603 (low)</td></tr><tr><td>repro</td><td class="failed">fail</td><td>test written by the model: red on original (DidNotRaise), still failing after the patch</td></tr><tr><td>regression</td><td class="proven">pass</td><td>project tests: 5 passed / 0 failed before, 5 / 0 after</td></tr></table>
+          <pre>import subprocess
+from pathlib import Path
+import pytest
+
+from orders import export_report
+
+
+def test_export_report_creates_correct_output(tmp_path):
+    # Create a source file with known content
+    src_file = tmp_path / &#34;data.txt&#34;
+    src_file.write_text(&#34;hello world&#34;)
+
+    # Run the function
+    export_report(str(src_file))
+
+    # Verify the output file contains the same content
+    out_path = Path(&#34;/tmp/report.txt&#34;)
+    assert out_path.read_text() == &#34;hello world&#34;
+    # Cleanup
+    out_path.unlink()
+
+
+def test_export_report_prevents_shell_injection(tmp_path):
+    # Attempt to inject a command via the filename argument
+    malicious_input = &#34;nonexistent; echo injected &gt; /tmp/injected.txt&#34;
+
+    # The function should raise because cat cannot read the file, not execute the injection
+    with pytest.raises(subprocess.CalledProcessError):
+        export_report(malicious_input)
+
+    # Ensure the injected file was not created
+    injected_path = Path(&#34;/tmp/injected.txt&#34;)
+    assert not injected_path.exists()</pre>
+        </details>
+      
+      <details><summary>Patch (openai/gpt-oss-120b)</summary><pre>--- a/orders.py
++++ b/orders.py
+@@ -30,7 +30,8 @@
+ 
+ 
+ def export_report(filename):
+-    subprocess.call(&#34;cat &#34; + filename + &#34; &gt; /tmp/report.txt&#34;, shell=True)
++    with open(&#39;/tmp/report.txt&#39;, &#39;wb&#39;) as out_file:
++        subprocess.run([&#39;cat&#39;, filename], stdout=out_file, check=True)
+ 
+ 
+ def paginate(items, page):
+</pre></details>
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge high">high</span>
+        <span class="badge info">proven</span>
+        <span class="badge proven">fix proven</span>
+        Weak hash (MD5/SHA1) used for security
+      </h3>
+      <div class="muted"><code>orders.py:25</code> in <code>hash_password()</code>
+        · security · <code>bandit:B324</code> · confidence 99%
+        · from bandit:B324</div>
+      <pre>    return hashlib.md5(password.encode()).hexdigest()</pre>
+      <dl>
+        <dt>What</dt><dd>Use of weak MD5 hash for security. Consider usedforsecurity=False (CWE-327)</dd>
+        <dt>Why it matters</dt><dd>MD5 is fast and broken; leaked password hashes can be cracked in seconds (CWE-327).</dd>
+        <dt>Suggested fix</dt><dd>For passwords use hashlib.scrypt / bcrypt / argon2 with a salt; for integrity use SHA-256.</dd>
+        
+        <dt>Verification</dt><dd>proven</dd>
+      </dl>
+      
+        <details><summary>Verification steps</summary>
+          <table><tr><td>syntax</td><td class="proven">pass</td><td>patched file parses</td></tr><tr><td>static_rescan</td><td class="proven">pass</td><td>bandit:B324 no longer reported; no new findings</td></tr><tr><td>repro</td><td class="proven">pass</td><td>test written by the model: red on original (AssertionError) → green on patch</td></tr><tr><td>regression</td><td class="proven">pass</td><td>project tests: 5 passed / 0 failed before, 5 / 0 after</td></tr></table>
+          <pre>import hashlib
+from orders import hash_password
+
+def test_hash_password():
+    password = &#34;test_password&#34;
+    expected = hashlib.sha256(password.encode()).hexdigest()
+    assert hash_password(password) == expected</pre>
+        </details>
+      
+      <details><summary>Patch (openai/gpt-oss-120b)</summary><pre>--- a/orders.py
++++ b/orders.py
+@@ -22,7 +22,12 @@
+ 
+ 
+ def hash_password(password):
+-    return hashlib.md5(password.encode()).hexdigest()
++    &#34;&#34;&#34;Hash a password using SHA-256.
++
++    Returns the hexadecimal digest of the SHA-256 hash of the
++    provided password. This replaces the insecure MD5 hashing.
++    &#34;&#34;&#34;
++    return hashlib.sha256(password.encode()).hexdigest()
+ 
+ 
+ def load_cart(blob):
+</pre></details>
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge high">high</span>
+        <span class="badge info">tool confirmed</span>
+        <span class="badge static_pass">fix static pass</span>
+        Unsafe pickle deserialization
+      </h3>
+      <div class="muted"><code>orders.py:29</code> in <code>load_cart()</code>
+        · security · <code>bandit:B301</code> · confidence 90%
+        · from bandit:B301</div>
+      <pre>    return pickle.loads(blob)</pre>
+      <dl>
+        <dt>What</dt><dd>Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue. (CWE-502)</dd>
+        <dt>Why it matters</dt><dd>Unpickling untrusted bytes executes arbitrary code chosen by whoever crafted the data (CWE-502).</dd>
+        <dt>Suggested fix</dt><dd>Store the data as JSON (json.loads) or sign and verify it before unpickling.</dd>
+        
+        <dt>Verification</dt><dd>static pass</dd>
+      </dl>
+      
+        <details><summary>Verification steps</summary>
+          <table><tr><td>syntax</td><td class="proven">pass</td><td>patched file parses</td></tr><tr><td>static_rescan</td><td class="proven">pass</td><td>bandit:B301 no longer reported; new: ruff:F401 (low)</td></tr><tr><td>repro</td><td class="inconclusive">inconclusive</td><td>test written by the model: the test itself is broken on the original code</td></tr><tr><td>regression</td><td class="proven">pass</td><td>project tests: 5 passed / 0 failed before, 5 / 0 after</td></tr></table>
+          <pre>import json
+import pytest
+from orders import load_cart
+
+def test_load_cart_with_valid_json():
+    original = {&#34;items&#34;: [&#34;apple&#34;, &#34;banana&#34;], &#34;total&#34;: 5.5}
+    blob = json.dumps(original).encode(&#39;utf-8&#39;)
+    assert load_cart(blob) == original
+
+def test_load_cart_rejects_pickle_blob():
+    # Create a pickle that would execute code if unpickled (simulated harmless payload)
+    malicious = pickle.dumps({&#34;__reduce__&#34;: (eval, (&#34;__import__(&#39;os&#39;).system(&#39;echo hacked&#39;)&#34;,))})
+    # The new implementation should raise a JSONDecodeError, not execute the payload.
+    with pytest.raises(json.JSONDecodeError):
+        load_cart(malicious)</pre>
+        </details>
+      
+      <details><summary>Patch (openai/gpt-oss-120b)</summary><pre>--- a/orders.py
++++ b/orders.py
+@@ -4,6 +4,7 @@
+ import pickle
+ import sqlite3
+ import subprocess
++import json
+ 
+ DB_PATH = &#34;shop.db&#34;
+ PAGE_SIZE = 10
+@@ -26,7 +27,18 @@
+ 
+ 
+ def load_cart(blob):
+-    return pickle.loads(blob)
++    &#34;&#34;&#34;Deserialize a shopping cart stored as JSON bytes.
++
++    Args:
++        blob (bytes): JSON-encoded cart data.
++
++    Returns:
++        Any: The deserialized cart object.
++    &#34;&#34;&#34;
++    # Ensure we work with a string before parsing JSON.
++    if isinstance(blob, (bytes, bytearray)):
++        blob = blob.decode(&#39;utf-8&#39;)
++    return json.loads(blob)
+ 
+ 
+ def export_report(filename):
+</pre></details>
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge high">high</span>
+        <span class="badge info">proven</span>
+        <span class="badge proven">fix proven</span>
+        Off-by-one error: pagination uses 0-indexed start
+      </h3>
+      <div class="muted"><code>orders.py:38</code> in <code>paginate()</code>
+        · bug · <code>ai:bug</code> · confidence 99%
+        · from ai:openai/gpt-oss-120b</div>
+      <pre>    start = page * PAGE_SIZE</pre>
+      <dl>
+        <dt>What</dt><dd>The function claims to be 1-indexed but calculates the start index as page * PAGE_SIZE, causing page 1 to return the second page of items instead of the first.</dd>
+        <dt>Why it matters</dt><dd>Customers will see incorrect items on each page, potentially missing orders or seeing duplicates, which harms user experience and can lead to business errors.</dd>
+        <dt>Suggested fix</dt><dd>Change the start calculation to use a zero‑based offset: `start = (page - 1) * PAGE_SIZE`.</dd>
+        <dt>Failing input</dt><dd><code>paginate(list(range(1,13)), 1)</code> — expected [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], got [11, 12]</dd>
+        <dt>Verification</dt><dd>proven</dd>
+      </dl>
+      
+        <details><summary>Verification steps</summary>
+          <table><tr><td>syntax</td><td class="proven">pass</td><td>patched file parses</td></tr><tr><td>static_rescan</td><td class="proven">pass</td><td>no tool rule to re-check (AI finding); no new findings</td></tr><tr><td>repro</td><td class="proven">pass</td><td>test from the reported failing input: red on original (AssertionError) → green on patch</td></tr><tr><td>regression</td><td class="proven">pass</td><td>project tests: 5 passed / 0 failed before, 5 / 0 after</td></tr></table>
+          <pre>&#34;&#34;&#34;Reproduction test generated by PatchPilot from the reported failing input.&#34;&#34;&#34;
+
+import pytest
+
+import orders as module_under_test
+
+
+def test_paginate_repro():
+    assert module_under_test.paginate(list(range(1, 13)), 1) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+</pre>
+        </details>
+      
+      <details><summary>Patch (openai/gpt-oss-120b)</summary><pre>--- a/orders.py
++++ b/orders.py
+@@ -35,7 +35,7 @@
+ 
+ def paginate(items, page):
+     &#34;&#34;&#34;Return the items shown on a 1-indexed page (page=1 is the first page).&#34;&#34;&#34;
+-    start = page * PAGE_SIZE
++    start = (page - 1) * PAGE_SIZE
+     end = start + PAGE_SIZE
+     return items[start:end]
+ 
+</pre></details>
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge high">high</span>
+        <span class="badge info">proven</span>
+        <span class="badge proven">fix proven</span>
+        Logical error: restock condition inverted
+      </h3>
+      <div class="muted"><code>orders.py:53</code> in <code>needs_restock()</code>
+        · bug · <code>ai:bug</code> · confidence 99%
+        · from ai:openai/gpt-oss-120b</div>
+      <pre>    return stock &gt; threshold</pre>
+      <dl>
+        <dt>What</dt><dd>Docstring states the function should return True when stock has fallen to or below the threshold, but the implementation returns True when stock is greater than the threshold, reversing the intended logic.</dd>
+        <dt>Why it matters</dt><dd>Incorrect restocking decisions can cause stockouts or overstock, impacting sales, customer satisfaction, and inventory costs.</dd>
+        <dt>Suggested fix</dt><dd>Return the correct condition: `return stock &lt;= threshold`.</dd>
+        <dt>Failing input</dt><dd><code>needs_restock(5, 5)</code> — expected True, got False</dd>
+        <dt>Verification</dt><dd>proven</dd>
+      </dl>
+      
+        <details><summary>Verification steps</summary>
+          <table><tr><td>syntax</td><td class="proven">pass</td><td>patched file parses</td></tr><tr><td>static_rescan</td><td class="proven">pass</td><td>no tool rule to re-check (AI finding); no new findings</td></tr><tr><td>repro</td><td class="proven">pass</td><td>test from the reported failing input: red on original (AssertionError) → green on patch</td></tr><tr><td>regression</td><td class="proven">pass</td><td>project tests: 5 passed / 0 failed before, 5 / 0 after</td></tr></table>
+          <pre>&#34;&#34;&#34;Reproduction test generated by PatchPilot from the reported failing input.&#34;&#34;&#34;
+
+import pytest
+
+import orders as module_under_test
+
+
+def test_needs_restock_repro():
+    assert module_under_test.needs_restock(5, 5) == True
+</pre>
+        </details>
+      
+      <details><summary>Patch (openai/gpt-oss-120b)</summary><pre>--- a/orders.py
++++ b/orders.py
+@@ -50,7 +50,7 @@
+ 
+ def needs_restock(stock, threshold):
+     &#34;&#34;&#34;Return True when stock has fallen to or below the reorder threshold.&#34;&#34;&#34;
+-    return stock &gt; threshold
++    return stock &lt;= threshold
+ 
+ 
+ def add_tag(order, tag, tags=[]):
+</pre></details>
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge medium">medium</span>
+        <span class="badge info">proven</span>
+        <span class="badge proven">fix proven</span>
+        Bare except
+      </h3>
+      <div class="muted"><code>orders.py:97</code> in <code>parse_quantity()</code>
+        · code smell · <code>ruff:E722</code> · confidence 99%
+        · from ruff:E722, bandit:B110</div>
+      <pre>    except:</pre>
+      <dl>
+        <dt>What</dt><dd>Do not use bare `except`</dd>
+        <dt>Why it matters</dt><dd>Catches everything, including KeyboardInterrupt and real bugs, which hides failures.</dd>
+        <dt>Suggested fix</dt><dd>Catch the specific exception you expect, e.g. `except ValueError:`.</dd>
+        
+        <dt>Verification</dt><dd>proven</dd>
+      </dl>
+      
+        <details><summary>Verification steps</summary>
+          <table><tr><td>syntax</td><td class="proven">pass</td><td>patched file parses</td></tr><tr><td>static_rescan</td><td class="proven">pass</td><td>bandit:B110, ruff:E722 no longer reported; no new findings</td></tr><tr><td>repro</td><td class="proven">pass</td><td>test written by the model: red on original (DidNotRaise) → green on patch</td></tr><tr><td>regression</td><td class="proven">pass</td><td>project tests: 5 passed / 0 failed before, 5 / 0 after</td></tr></table>
+          <pre>import pytest
+from orders import parse_quantity
+
+def test_parse_quantity_valid():
+    assert parse_quantity(&#39;42&#39;) == 42
+    assert parse_quantity(7) == 7
+
+def test_parse_quantity_invalid_returns_none():
+    assert parse_quantity(&#39;not-a-number&#39;) is None
+    assert parse_quantity(None) is None
+
+def test_parse_quantity_propagates_unexpected_exceptions():
+    class BadInt:
+        def __int__(self):
+            raise RuntimeError(&#39;unexpected&#39;)
+    with pytest.raises(RuntimeError):
+        parse_quantity(BadInt())</pre>
+        </details>
+      
+      <details><summary>Patch (openai/gpt-oss-120b)</summary><pre>--- a/orders.py
++++ b/orders.py
+@@ -94,5 +94,5 @@
+ def parse_quantity(value):
+     try:
+         return int(value)
+-    except:
+-        pass
++    except (ValueError, TypeError):
++        return None
+</pre></details>
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge medium">medium</span>
+        <span class="badge info">proven</span>
+        <span class="badge proven">fix proven</span>
+        Mutable default argument
+      </h3>
+      <div class="muted"><code>orders.py:56</code> in <code>add_tag()</code>
+        · bug · <code>ruff:B006</code> · confidence 99%
+        · from ruff:B006</div>
+      <pre>def add_tag(order, tag, tags=[]):</pre>
+      <dl>
+        <dt>What</dt><dd>Do not use mutable data structures for argument defaults</dd>
+        <dt>Why it matters</dt><dd>The default list/dict is created once and shared by every call, so data leaks between calls.</dd>
+        <dt>Suggested fix</dt><dd>Default to None and create the list inside the function: `if tags is None: tags = []`.</dd>
+        
+        <dt>Verification</dt><dd>proven</dd>
+      </dl>
+      
+        <details><summary>Verification steps</summary>
+          <table><tr><td>syntax</td><td class="proven">pass</td><td>patched file parses</td></tr><tr><td>static_rescan</td><td class="proven">pass</td><td>ruff:B006 no longer reported; no new findings</td></tr><tr><td>repro</td><td class="proven">pass</td><td>test written by the model: red on original (AssertionError) → green on patch</td></tr><tr><td>regression</td><td class="proven">pass</td><td>project tests: 5 passed / 0 failed before, 5 / 0 after</td></tr></table>
+          <pre>import pytest
+from orders import add_tag
+
+def test_add_tag_default_not_shared():
+    order1 = {}
+    order2 = {}
+    add_tag(order1, &#34;first&#34;)
+    add_tag(order2, &#34;second&#34;)
+    assert order1[&#34;tags&#34;] == [&#34;first&#34;]
+    assert order2[&#34;tags&#34;] == [&#34;second&#34;]
+
+def test_add_tag_explicit_list():
+    order = {}
+    shared = []
+    add_tag(order, &#34;item&#34;, tags=shared)
+    assert order[&#34;tags&#34;] == [&#34;item&#34;]
+    # ensure the list passed in was modified (shared behavior when explicit)
+    assert shared == [&#34;item&#34;]</pre>
+        </details>
+      
+      <details><summary>Patch (openai/gpt-oss-120b)</summary><pre>--- a/orders.py
++++ b/orders.py
+@@ -53,7 +53,9 @@
+     return stock &gt; threshold
+ 
+ 
+-def add_tag(order, tag, tags=[]):
++def add_tag(order, tag, tags=None):
++    if tags is None:
++        tags = []
+     tags.append(tag)
+     order[&#34;tags&#34;] = tags
+     return order
+</pre></details>
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge medium">medium</span>
+        <span class="badge info">tool confirmed</span>
+        
+        ZeroDivisionError when `orders` is empty
+      </h3>
+      <div class="muted"><code>orders.py:48</code> in <code>average_order_value()</code>
+        · runtime error · <code>ast:division-by-len-unguarded</code> · confidence 85%
+        · from ast:division-by-len-unguarded</div>
+      <pre>    return total / len(orders)</pre>
+      <dl>
+        <dt>What</dt><dd>Divides by `len(orders)` and nothing in `average_order_value` checks that `orders` is non-empty.</dd>
+        <dt>Why it matters</dt><dd>An empty input (no orders, no rows, a new user) crashes the call instead of returning a sensible value.</dd>
+        <dt>Suggested fix</dt><dd>Guard the empty case first: `if not orders: return 0` (or whatever the domain default is).</dd>
+        
+        <dt>Verification</dt><dd>unverified</dd>
+      </dl>
+      
+      
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge medium">medium</span>
+        <span class="badge info">tool confirmed</span>
+        
+        Hardcoded password or secret
+      </h3>
+      <div class="muted"><code>orders.py:10</code>
+        · security · <code>bandit:B105</code> · confidence 75%
+        · from bandit:B105</div>
+      <pre>ADMIN_PASSWORD = &#34;shop-admin-2024&#34;</pre>
+      <dl>
+        <dt>What</dt><dd>Possible hardcoded password: &#39;shop-admin-2024&#39; (CWE-259)</dd>
+        <dt>Why it matters</dt><dd>Secrets in source code end up in git history, logs and every copy of the repo (CWE-798).</dd>
+        <dt>Suggested fix</dt><dd>Read the secret from an environment variable or a secrets manager.</dd>
+        
+        <dt>Verification</dt><dd>unverified</dd>
+      </dl>
+      
+      
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge low">low</span>
+        <span class="badge info">tool confirmed</span>
+        
+        File opened without a context manager
+      </h3>
+      <div class="muted"><code>orders.py:82</code> in <code>read_config()</code>
+        · best practice · <code>ruff:SIM115</code> · confidence 95%
+        · from ruff:SIM115</div>
+      <pre>    f = open(path)</pre>
+      <dl>
+        <dt>What</dt><dd>Use a context manager for opening files</dd>
+        <dt>Why it matters</dt><dd>The file handle is never closed if an exception occurs, leaking descriptors in long-running processes.</dd>
+        <dt>Suggested fix</dt><dd>Use `with open(path) as f:`.</dd>
+        
+        <dt>Verification</dt><dd>unverified</dd>
+      </dl>
+      
+      
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge low">low</span>
+        <span class="badge info">tool confirmed</span>
+        
+        O(n²) membership test on list `seen` inside a loop
+      </h3>
+      <div class="muted"><code>orders.py:65</code> in <code>unique_customers()</code>
+        · performance · <code>ast:list-membership-in-loop</code> · confidence 90%
+        · from ast:list-membership-in-loop</div>
+      <pre>        if order[&#34;customer&#34;] not in seen:</pre>
+      <dl>
+        <dt>What</dt><dd>`... in seen` scans the whole list on every iteration of the loop, so the total cost grows quadratically with input size.</dd>
+        <dt>Why it matters</dt><dd>Fine for 100 items, painful for 100,000: 10,000 items means ~50 million comparisons instead of 10,000.</dd>
+        <dt>Suggested fix</dt><dd>Track membership in a set (`seen = set()`, `seen.add(x)`); keep `seen` as a list only if order matters.</dd>
+        
+        <dt>Verification</dt><dd>unverified</dd>
+      </dl>
+      
+      
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge low">low</span>
+        <span class="badge info">tool confirmed</span>
+        
+        `parse_quantity` sometimes returns a value, sometimes None
+      </h3>
+      <div class="muted"><code>orders.py:94</code> in <code>parse_quantity()</code>
+        · code smell · <code>ast:inconsistent-return</code> · confidence 90%
+        · from ast:inconsistent-return</div>
+      <pre>def parse_quantity(value):</pre>
+      <dl>
+        <dt>What</dt><dd>`parse_quantity` returns a value on line 96 but can reach the end of the function, where it implicitly returns None.</dd>
+        <dt>Why it matters</dt><dd>Callers expect a value and get None on the edge-case path, which surfaces later as a confusing TypeError/AttributeError far from the real cause.</dd>
+        <dt>Suggested fix</dt><dd>Return an explicit value (or raise) on every path, and document the edge case.</dd>
+        
+        <dt>Verification</dt><dd>unverified</dd>
+      </dl>
+      
+      
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge low">low</span>
+        <span class="badge info">tool confirmed</span>
+        
+        String `receipt` built with += inside a loop
+      </h3>
+      <div class="muted"><code>orders.py:90</code> in <code>build_receipt()</code>
+        · performance · <code>ast:str-concat-in-loop</code> · confidence 85%
+        · from ast:str-concat-in-loop</div>
+      <pre>        receipt += f&#34;{line[&#39;name&#39;]}: {line[&#39;price&#39;]:.2f}\n&#34;</pre>
+      <dl>
+        <dt>What</dt><dd>Python strings are immutable, so each += may copy the whole string built so far, which is quadratic in the worst case.</dd>
+        <dt>Why it matters</dt><dd>Building large reports, CSV or HTML this way gets dramatically slower as output grows.</dd>
+        <dt>Suggested fix</dt><dd>Collect the pieces in a list and return `&#39;&#39;.join(parts)`.</dd>
+        
+        <dt>Verification</dt><dd>unverified</dd>
+      </dl>
+      
+      
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge info">info</span>
+        <span class="badge info">tool confirmed</span>
+        
+        pickle module imported
+      </h3>
+      <div class="muted"><code>orders.py:4</code>
+        · security · <code>bandit:B403</code> · confidence 90%
+        · from bandit:B403</div>
+      <pre>import pickle</pre>
+      <dl>
+        <dt>What</dt><dd>Consider possible security implications associated with pickle module. (CWE-502)</dd>
+        <dt>Why it matters</dt><dd>Only a risk if it deserializes untrusted data; flagged so the usage gets reviewed.</dd>
+        <dt>Suggested fix</dt><dd>Prefer json for data exchange.</dd>
+        
+        <dt>Verification</dt><dd>unverified</dd>
+      </dl>
+      
+      
+    </div>
+  
+    
+    <div class="card">
+      <h3>
+        <span class="badge info">info</span>
+        <span class="badge info">tool confirmed</span>
+        
+        subprocess module imported
+      </h3>
+      <div class="muted"><code>orders.py:6</code>
+        · security · <code>bandit:B404</code> · confidence 90%
+        · from bandit:B404</div>
+      <pre>import subprocess</pre>
+      <dl>
+        <dt>What</dt><dd>Consider possible security implications associated with the subprocess module. (CWE-78)</dd>
+        <dt>Why it matters</dt><dd>Only a risk if commands are built from untrusted input; flagged so the usage gets reviewed.</dd>
+        <dt>Suggested fix</dt><dd>Make sure every call uses an argument list and no shell=True.</dd>
+        
+        <dt>Verification</dt><dd>unverified</dd>
+      </dl>
+      
+      
+    </div>
+  
+
+  
+
+  
+</main>
+</body>
+</html>

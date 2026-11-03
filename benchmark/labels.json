@@ -1,0 +1,77 @@
+{
+  "_about": "Ground truth for benchmark/cases, written before any engine was run on them. A finding is a true positive if it falls inside a defect's line span and its category family is accepted. Findings inside an 'ignore' span (debatable issues) count as neither. Info-severity findings are excluded. Families: correctness = bug/runtime_error, quality = code_smell/maintainability/best_practice/style; correctness and quality accept each other.",
+  "cases": {
+    "inventory.py": {
+      "defects": [
+        {"id": "range-skips-first-item", "lines": [9, 10], "family": "correctness"},
+        {"id": "low-stock-uses-lte", "lines": [16, 16], "family": "correctness"},
+        {"id": "get-result-indexed-without-check", "lines": [20, 21], "family": "correctness"}
+      ],
+      "ignore": []
+    },
+    "auth.py": {
+      "defects": [
+        {"id": "hardcoded-secret", "lines": [9, 9], "family": "security"},
+        {"id": "insecure-random-token", "lines": [14, 14], "family": "security"},
+        {"id": "timing-unsafe-compare", "lines": [18, 18], "family": "security"},
+        {"id": "yaml-unsafe-load", "lines": [23, 23], "family": "security"},
+        {"id": "eval-user-expression", "lines": [27, 27], "family": "security"},
+        {"id": "is-admin-or-instead-of-and", "lines": [36, 36], "family": "correctness", "accept": ["correctness", "security"]}
+      ],
+      "ignore": []
+    },
+    "billing.py": {
+      "defects": [
+        {"id": "tax-before-discount", "lines": [8, 9], "family": "correctness"},
+        {"id": "average-empty-zero-division", "lines": [18, 18], "family": "correctness"},
+        {"id": "to-cents-truncates", "lines": [23, 23], "family": "correctness"},
+        {"id": "mutable-default-lines", "lines": [26, 26], "family": "correctness"}
+      ],
+      "ignore": [[12, 14]]
+    },
+    "reports.py": {
+      "defects": [
+        {"id": "list-membership-in-loop", "lines": [9, 9], "family": "performance"},
+        {"id": "string-concat-in-loop", "lines": [17, 17], "family": "performance"},
+        {"id": "nested-loop-join", "lines": [23, 25], "family": "performance"},
+        {"id": "open-without-with", "lines": [39, 40], "family": "quality", "accept": ["quality", "correctness", "performance"]}
+      ],
+      "ignore": [[30, 35]]
+    },
+    "users.py": {
+      "defects": [
+        {"id": "regex-match-not-checked", "lines": [7, 8], "family": "correctness"},
+        {"id": "parse-age-returns-none", "lines": [15, 19], "family": "correctness"},
+        {"id": "bare-except", "lines": [18, 19], "family": "quality"},
+        {"id": "needless-bool-branches", "lines": [23, 26], "family": "quality"},
+        {"id": "unreachable-print", "lines": [27, 27], "family": "quality"}
+      ],
+      "ignore": [[11, 12]]
+    },
+    "scheduler.py": {
+      "defects": [
+        {"id": "weekend-check-inverted", "lines": [8, 8], "family": "correctness"},
+        {"id": "shift-across-midnight-negative", "lines": [13, 13], "family": "correctness"},
+        {"id": "lambda-late-binding", "lines": [19, 19], "family": "correctness"},
+        {"id": "sql-injection-percent-format", "lines": [24, 25], "family": "security"},
+        {"id": "inclusive-range-off-by-one", "lines": [30, 30], "family": "correctness"}
+      ],
+      "ignore": []
+    },
+    "cache.py": {
+      "defects": [
+        {"id": "ttl-check-inverted", "lines": [17, 18], "family": "correctness"},
+        {"id": "evicts-newest-not-oldest", "lines": [23, 25], "family": "correctness"},
+        {"id": "is-literal-comparison", "lines": [33, 33], "family": "correctness"}
+      ],
+      "ignore": []
+    },
+    "parser.py": {
+      "defects": [
+        {"id": "pickle-untrusted", "lines": [21, 21], "family": "security"},
+        {"id": "shell-injection", "lines": [25, 25], "family": "security"}
+      ],
+      "ignore": [[7, 8], [11, 17]]
+    }
+  }
+}

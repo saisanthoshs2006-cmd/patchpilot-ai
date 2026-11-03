@@ -1,0 +1,5 @@
+{
+ "model": "openai/gpt-oss-120b",
+ "tag": "patch-f10840378cac",
+ "response_text": "{\n  \"new_imports\": [],\n  \"rationale\": \"Changed the default argument from a mutable list to None and initialize a new list inside the function to avoid shared state across calls.\",\n  \"replacement_code\": \"def add_tag(order, tag, tags=None):\\n    if tags is None:\\n        tags = []\\n    tags.append(tag)\\n    order[\\\"tags\\\"] = tags\\n    return order\",\n  \"test_code\": \"import pytest\\nfrom orders import add_tag\\n\\ndef test_add_tag_default_not_shared():\\n    order1 = {}\\n    order2 = {}\\n    add_tag(order1, \\\"first\\\")\\n    add_tag(order2, \\\"second\\\")\\n    assert order1[\\\"tags\\\"] == [\\\"first\\\"]\\n    assert order2[\\\"tags\\\"] == [\\\"second\\\"]\\n\\ndef test_add_tag_explicit_list():\\n    order = {}\\n    shared = []\\n    add_tag(order, \\\"item\\\", tags=shared)\\n    assert order[\\\"tags\\\"] == [\\\"item\\\"]\\n    # ensure the list passed in was modified (shared behavior when explicit)\\n    assert shared == [\\\"item\\\"]\\n\"\n}"
+}

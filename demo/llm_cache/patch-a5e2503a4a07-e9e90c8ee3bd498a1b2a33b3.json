@@ -1,0 +1,5 @@
+{
+ "model": "openai/gpt-oss-120b",
+ "tag": "patch-a5e2503a4a07",
+ "response_text": "{\"replacement_code\":\"def paginate(items, page):\\n    \\\"\\\"\\\"Return the items shown on a 1-indexed page (page=1 is the first page).\\\"\\\"\\\"\\n    start = (page - 1) * PAGE_SIZE\\n    end = start + PAGE_SIZE\\n    return items[start:end]\",\"new_imports\":[],\"rationale\":\"Adjusted the start index to (page - 1) * PAGE_SIZE so the function correctly treats the page argument as 1-indexed, fixing the off\u2011by\u2011one error.\",\"test_code\":\"from orders import paginate\\n\\ndef test_paginate_first_page():\\n    items = list(range(1, 13))\\n    assert paginate(items, 1) == list(range(1, 11))\\n\\ndef test_paginate_second_page():\\n    items = list(range(1, 13))\\n    assert paginate(items, 2) == [11, 12]\\n\"}"
+}

@@ -1,0 +1,14 @@
+[project]
+name = "patchpilot"
+version = "0.4.0"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+# The demo and benchmark contain bugs on purpose.
+extend-exclude = ["demo", "benchmark/cases"]
